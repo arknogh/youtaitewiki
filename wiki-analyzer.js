@@ -10,14 +10,14 @@ const sampleData = [
     {title: "Character2", has_infobox_character_template: true, has_infobox_template: false, has_infobox_class: false, has_article_table_class: false, has_other_table: false, is_admin_protected: false},
     {title: "Character3", has_infobox_character_template: false, has_infobox_template: false, has_infobox_class: true, has_article_table_class: false, has_other_table: false, is_admin_protected: true},
     {title: "Character4", has_infobox_character_template: false, has_infobox_template: true, has_infobox_class: false, has_article_table_class: false, has_other_table: false, is_admin_protected: false},
-    {title: "ChallengePage", has_infobox_character_template: false, has_infobox_template: false, has_infobox_class: false, has_article_table_class: true, has_other_table: false, is_admin_protected: false},
-    {title: "EventPage", has_infobox_character_template: false, has_infobox_template: false, has_infobox_class: false, has_article_table_class: true, has_other_table: false, is_admin_protected: true},
-    {title: "GroupPage", has_infobox_character_template: false, has_infobox_template: false, has_infobox_class: false, has_article_table_class: false, has_other_table: true, is_admin_protected: false},
+    {title: "ChallengePage", has_infobox_character_template: false, has_infobox_template: false, has_infobox_class: false, has_article_table_class: true, has_other_table: false, is_admin_protected: true},
+    {title: "EventPage", has_infobox_character_template: false, has_infobox_template: false, has_infobox_class: false, has_article_table_class: true, has_other_table: false, is_admin_protected: false},
+    {title: "GroupPage", has_infobox_character_template: false, has_infobox_template: false, has_infobox_class: false, has_article_table_class: false, has_other_table: true, is_admin_protected: true},
     {title: "InfoPage", has_infobox_character_template: false, has_infobox_template: false, has_infobox_class: false, has_article_table_class: false, has_other_table: false, is_admin_protected: false},
-    {title: "Tutorial", has_infobox_character_template: true, has_infobox_template: false, has_infobox_class: false, has_article_table_class: false, has_other_table: false, is_admin_protected: false},
+    {title: "Tutorial", has_infobox_character_template: true, has_infobox_template: false, has_infobox_class: false, has_article_table_class: false, has_other_table: false, is_admin_protected: true},
     {title: "AboutPage", has_infobox_character_template: false, has_infobox_template: false, has_infobox_class: false, has_article_table_class: false, has_other_table: false, is_admin_protected: false},
-    {title: "AshePage", has_infobox_character_template: false, has_infobox_template: false, has_infobox_class: true, has_article_table_class: false, has_other_table: false, is_admin_protected: true},
-    {title: "BelphegorPage", has_infobox_character_template: false, has_infobox_template: false, has_infobox_class: true, has_article_table_class: false, has_other_table: false, is_admin_protected: false},
+    {title: "AshePage", has_infobox_character_template: false, has_infobox_template: false, has_infobox_class: true, has_article_table_class: false, has_other_table: false, is_admin_protected: false},
+    {title: "BelphegorPage", has_infobox_character_template: false, has_infobox_template: false, has_infobox_class: true, has_article_table_class: false, has_other_table: false, is_admin_protected: true},
     {title: "NekonPage", has_infobox_character_template: false, has_infobox_template: false, has_infobox_class: false, has_article_table_class: true, has_other_table: false, is_admin_protected: false},
     {title: "KunjiPage", has_infobox_character_template: true, has_infobox_template: false, has_infobox_class: false, has_article_table_class: false, has_other_table: false, is_admin_protected: true},
     {title: "DangoPage", has_infobox_character_template: true, has_infobox_template: false, has_infobox_class: false, has_article_table_class: false, has_other_table: false, is_admin_protected: false}
@@ -30,45 +30,45 @@ function generateMockData(count = 50) {
     const data = [];
     
     for (let i = 0; i < count; i++) {
-        let newItem;
-        
         // For character pages (about 60% of pages), use character templates or classes
         if (Math.random() < 0.6) {
             const name = characterNames[Math.floor(Math.random() * characterNames.length)];
             const pageType = Math.random();
+            const isProtected = Math.random() < 0.3; // 30% chance of being admin protected
+            
             if (pageType < 0.33) {
                 // Use infobox_character template
-                newItem = {
+                data.push({
                     title: `${name}${Math.random() < 0.3 ? " (YT)" : ""}`,
                     has_infobox_character_template: true,
                     has_infobox_template: false,
                     has_infobox_class: false,
                     has_article_table_class: false,
                     has_other_table: false,
-                    is_admin_protected: Math.random() < 0.3 // 30% of character pages are protected
-                };
+                    is_admin_protected: isProtected
+                });
             } else if (pageType < 0.66) {
                 // Use infobox class
-                newItem = {
+                data.push({
                     title: `${name}${Math.random() < 0.3 ? " (NND)" : ""}`,
                     has_infobox_character_template: false,
                     has_infobox_template: false,
                     has_infobox_class: true,
                     has_article_table_class: false,
                     has_other_table: false,
-                    is_admin_protected: Math.random() < 0.3
-                };
+                    is_admin_protected: isProtected
+                });
             } else {
                 // Use article-table class
-                newItem = {
+                data.push({
                     title: `${name}${Math.random() < 0.3 ? " (male)" : ""}`,
                     has_infobox_character_template: false,
                     has_infobox_template: false,
                     has_infobox_class: false,
                     has_article_table_class: true,
                     has_other_table: false,
-                    is_admin_protected: Math.random() < 0.3
-                };
+                    is_admin_protected: isProtected
+                });
             }
         } 
         // For other pages (about 40%), use other structures or no tables
@@ -76,55 +76,54 @@ function generateMockData(count = 50) {
             const pageTypes = ["Event", "Challenge", "Group", "Album", "Song", "Guide", "Category", "List"];
             const pageType = pageTypes[Math.floor(Math.random() * pageTypes.length)];
             const tableType = Math.random();
+            const isProtected = Math.random() < 0.2; // 20% chance of being admin protected for non-character pages
             
             if (tableType < 0.25) {
                 // Use other infobox template
-                newItem = {
+                data.push({
                     title: `${pageType}:${Math.floor(Math.random() * 100)}`,
                     has_infobox_character_template: false,
                     has_infobox_template: true,
                     has_infobox_class: false,
                     has_article_table_class: false,
                     has_other_table: false,
-                    is_admin_protected: Math.random() < 0.1 // 10% of non-character pages are protected
-                };
+                    is_admin_protected: isProtected
+                });
             } else if (tableType < 0.5) {
                 // Use article-table
-                newItem = {
+                data.push({
                     title: `${pageType}:${Math.floor(Math.random() * 100)}`,
                     has_infobox_character_template: false,
                     has_infobox_template: false,
                     has_infobox_class: false,
                     has_article_table_class: true,
                     has_other_table: false,
-                    is_admin_protected: Math.random() < 0.1
-                };
+                    is_admin_protected: isProtected
+                });
             } else if (tableType < 0.75) {
                 // Use other table
-                newItem = {
+                data.push({
                     title: `${pageType}:${Math.floor(Math.random() * 100)}`,
                     has_infobox_character_template: false,
                     has_infobox_template: false,
                     has_infobox_class: false,
                     has_article_table_class: false,
                     has_other_table: true,
-                    is_admin_protected: Math.random() < 0.1
-                };
+                    is_admin_protected: isProtected
+                });
             } else {
                 // No tables
-                newItem = {
+                data.push({
                     title: `${pageType}:${Math.floor(Math.random() * 100)}`,
                     has_infobox_character_template: false,
                     has_infobox_template: false,
                     has_infobox_class: false,
                     has_article_table_class: false,
                     has_other_table: false,
-                    is_admin_protected: Math.random() < 0.1
-                };
+                    is_admin_protected: isProtected
+                });
             }
         }
-        
-        data.push(newItem);
     }
     
     return data;
@@ -197,6 +196,11 @@ document.addEventListener('DOMContentLoaded', function() {
         filterTable();
     });
     
+    // Setup protection filter
+    document.getElementById('protectionFilter').addEventListener('change', function() {
+        filterTable();
+    });
+    
     // Setup pagination
     document.getElementById('prevPageBtn').addEventListener('click', function() {
         if (currentPage > 1) {
@@ -212,32 +216,7 @@ document.addEventListener('DOMContentLoaded', function() {
             displayTablePage();
         }
     });
-    
-    // Initialize filter options
-    updateFilterOptions();
 });
-
-// Update table header to include admin protection column
-function updateTableHeader() {
-    const tableHeader = document.querySelector('thead tr');
-    if (!tableHeader.querySelector('th:last-child')?.textContent.includes('Admin Protected')) {
-        const protectedTh = document.createElement('th');
-        protectedTh.className = 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider';
-        protectedTh.textContent = 'Admin Protected';
-        tableHeader.appendChild(protectedTh);
-    }
-}
-
-// Add a new filter option for admin protected pages
-function updateFilterOptions() {
-    const filterSelect = document.getElementById('tableFilter');
-    if (!Array.from(filterSelect.options).some(option => option.value === 'admin_protected')) {
-        const protectedOption = document.createElement('option');
-        protectedOption.value = 'admin_protected';
-        protectedOption.textContent = 'Admin Protected';
-        filterSelect.appendChild(protectedOption);
-    }
-}
 
 function showLoading() {
     document.getElementById('loadingIndicator').classList.remove('hidden');
@@ -266,6 +245,8 @@ function handleFileUpload(file) {
                 for (const key in processedRow) {
                     if (processedRow[key] === 'true') processedRow[key] = true;
                     if (processedRow[key] === 'false') processedRow[key] = false;
+                    if (processedRow[key] === 'TRUE') processedRow[key] = true;
+                    if (processedRow[key] === 'FALSE') processedRow[key] = false;
                 }
                 return processedRow;
             });
@@ -308,22 +289,7 @@ function updateSummary() {
     
     document.getElementById('totalInfoboxes').textContent = infoboxCount;
     document.getElementById('totalTables').textContent = tableCount;
-    
-    // Add protected pages count if element exists, otherwise create it
-    const summaryContainer = document.querySelector('#dataSummary .grid');
-    let protectedElement = document.getElementById('totalProtected');
-    
-    if (!protectedElement) {
-        const protectedDiv = document.createElement('div');
-        protectedDiv.className = 'bg-yellow-50 p-4 rounded-lg border border-yellow-200';
-        protectedDiv.innerHTML = `
-            <h3 class="text-lg font-medium text-yellow-800">Admin Protected</h3>
-            <p class="text-3xl font-bold text-yellow-600" id="totalProtected">${protectedCount}</p>
-        `;
-        summaryContainer.appendChild(protectedDiv);
-    } else {
-        protectedElement.textContent = protectedCount;
-    }
+    document.getElementById('protectedPages').textContent = protectedCount;
 }
 
 function createCharts() {
@@ -343,9 +309,9 @@ function createCharts() {
         !item.has_other_table
     ).length;
     
-    // Calculate protected vs non-protected counts
+    // Protection data
     const protectedCount = allData.filter(item => item.is_admin_protected).length;
-    const nonProtectedCount = allData.length - protectedCount;
+    const unprotectedCount = allData.length - protectedCount;
     
     // Create or update infobox chart
     const infoboxCtx = document.getElementById('infoboxChart').getContext('2d');
@@ -428,38 +394,10 @@ function createCharts() {
         }
     });
     
-    // Create protection chart container if it doesn't exist
-    let protectionChartContainer = document.getElementById('protectionChartContainer');
-    if (!protectionChartContainer) {
-        const chartsSection = document.getElementById('chartsSection');
-        let chartGrid = chartsSection.querySelector('.grid');
-        
-        // If the grid doesn't exist yet, create it
-        if (!chartGrid) {
-            chartGrid = document.createElement('div');
-            chartGrid.className = 'grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8';
-            chartsSection.appendChild(chartGrid);
-        } else {
-            // Change the grid to 3 columns on large screens
-            chartGrid.className = 'grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8';
-        }
-        
-        protectionChartContainer = document.createElement('div');
-        protectionChartContainer.id = 'protectionChartContainer';
-        protectionChartContainer.className = 'bg-white rounded-lg shadow p-6';
-        protectionChartContainer.innerHTML = `
-            <h2 class="text-xl font-semibold mb-4">Admin Protection Status</h2>
-            <div class="h-64">
-                <canvas id="protectionChart"></canvas>
-            </div>
-        `;
-        
-        chartGrid.appendChild(protectionChartContainer);
-    }
-    
-    // Create protection chart
+    // Create or update protection chart
     const protectionCtx = document.getElementById('protectionChart').getContext('2d');
     
+    // Check if chart exists before trying to destroy it
     if (window.protectionChart instanceof Chart) {
         window.protectionChart.destroy();
     }
@@ -469,14 +407,14 @@ function createCharts() {
         data: {
             labels: ['Admin Protected', 'Not Protected'],
             datasets: [{
-                data: [protectedCount, nonProtectedCount],
+                data: [protectedCount, unprotectedCount],
                 backgroundColor: [
-                    'rgba(255, 193, 7, 0.7)',
-                    'rgba(108, 117, 125, 0.7)'
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(75, 192, 192, 0.7)'
                 ],
                 borderColor: [
-                    'rgb(255, 193, 7)',
-                    'rgb(108, 117, 125)'
+                    'rgb(255, 99, 132)',
+                    'rgb(75, 192, 192)'
                 ],
                 borderWidth: 1
             }]
@@ -491,11 +429,87 @@ function createCharts() {
             }
         }
     });
+    
+    // Create protection by type chart
+    const protectionByTypeCtx = document.getElementById('protectionByTypeChart').getContext('2d');
+    
+    // Check if chart exists before trying to destroy it
+    if (window.protectionByTypeChart instanceof Chart) {
+        window.protectionByTypeChart.destroy();
+    }
+    
+    // Get protected count by page type
+    const protectedCharCount = allData.filter(item => 
+        item.is_admin_protected && item.has_infobox_character_template
+    ).length;
+    
+    const protectedOtherInfoboxCount = allData.filter(item => 
+        item.is_admin_protected && item.has_infobox_template
+    ).length;
+    
+    const protectedInfoboxClassCount = allData.filter(item => 
+        item.is_admin_protected && item.has_infobox_class
+    ).length;
+    
+    const protectedArticleTableCount = allData.filter(item => 
+        item.is_admin_protected && item.has_article_table_class
+    ).length;
+    
+    const protectedOtherTableCount = allData.filter(item => 
+        item.is_admin_protected && item.has_other_table
+    ).length;
+    
+    const protectedNoTableCount = allData.filter(item => 
+        item.is_admin_protected && 
+        !item.has_infobox_character_template && 
+        !item.has_infobox_template &&
+        !item.has_infobox_class &&
+        !item.has_article_table_class &&
+        !item.has_other_table
+    ).length;
+    
+    window.protectionByTypeChart = new Chart(protectionByTypeCtx, {
+        type: 'bar',
+        data: {
+            labels: [
+                'Character Infobox', 
+                'Other Infobox', 
+                'Infobox Class', 
+                'Article Table', 
+                'Other Table', 
+                'No Table'
+            ],
+            datasets: [{
+                label: 'Protected Pages by Type',
+                data: [
+                    protectedCharCount,
+                    protectedOtherInfoboxCount,
+                    protectedInfoboxClassCount,
+                    protectedArticleTableCount,
+                    protectedOtherTableCount,
+                    protectedNoTableCount
+                ],
+                backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                borderColor: 'rgb(54, 162, 235)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
 }
 
 function filterTable() {
     const searchTerm = document.getElementById('tableSearch').value.toLowerCase();
     const filterType = document.getElementById('tableFilter').value;
+    const protectionFilter = document.getElementById('protectionFilter').value;
     
     filteredData = allData.filter(item => {
         // Apply search filter
@@ -519,11 +533,17 @@ function filterTable() {
                          !item.has_infobox_class && 
                          !item.has_article_table_class && 
                          !item.has_other_table;
-        } else if (filterType === 'admin_protected') {
-            matchesType = item.is_admin_protected;
         }
         
-        return matchesSearch && matchesType;
+        // Apply protection filter
+        let matchesProtection = true;
+        if (protectionFilter === 'protected') {
+            matchesProtection = item.is_admin_protected;
+        } else if (protectionFilter === 'unprotected') {
+            matchesProtection = !item.is_admin_protected;
+        }
+        
+        return matchesSearch && matchesType && matchesProtection;
     });
     
     // Reset to first page
@@ -532,8 +552,6 @@ function filterTable() {
 }
 
 function displayTablePage() {
-    updateTableHeader();
-    
     const tableBody = document.getElementById('dataTableBody');
     tableBody.innerHTML = '';
     
@@ -550,6 +568,11 @@ function displayTablePage() {
         titleCell.className = 'px-6 py-4 whitespace-nowrap';
         titleCell.textContent = item.title;
         row.appendChild(titleCell);
+        
+        // Admin Protected
+        const protectedCell = createStatusCell(item.is_admin_protected);
+        protectedCell.className += item.is_admin_protected ? ' bg-red-50' : '';
+        row.appendChild(protectedCell);
         
         // Infobox Character
         const infoboxCharCell = createStatusCell(item.has_infobox_character_template);
@@ -570,10 +593,6 @@ function displayTablePage() {
         // Other Table
         const otherTableCell = createStatusCell(item.has_other_table);
         row.appendChild(otherTableCell);
-        
-        // Admin Protected
-        const protectedCell = createStatusCell(item.is_admin_protected);
-        row.appendChild(protectedCell);
         
         tableBody.appendChild(row);
     });
@@ -606,11 +625,11 @@ function exportToCsv() {
     let csvContent = "data:text/csv;charset=utf-8,";
     
     // Add headers
-    csvContent += "Page Title,Infobox Character,Other Infobox,Infobox Class,Article Table,Other Table,Admin Protected\n";
+    csvContent += "Page Title,Admin Protected,Infobox Character,Other Infobox,Infobox Class,Article Table,Other Table\n";
     
     // Add data rows
     filteredData.forEach(item => {
-        csvContent += `"${item.title}",${item.has_infobox_character_template},${item.has_infobox_template},${item.has_infobox_class},${item.has_article_table_class},${item.has_other_table},${item.is_admin_protected}\n`;
+        csvContent += `"${item.title}",${item.is_admin_protected},${item.has_infobox_character_template},${item.has_infobox_template},${item.has_infobox_class},${item.has_article_table_class},${item.has_other_table}\n`;
     });
     
     // Create download link
