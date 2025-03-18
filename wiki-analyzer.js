@@ -327,14 +327,15 @@ function updateSummary() {
     const totalPagesEl = safeGetElement('totalPages');
     if (totalPagesEl) totalPagesEl.textContent = allData.length;
     
-    const infoboxCharCount = allData.filter(item => item.has_infobox_character_template).length;
-    const infoboxTemplateCount = allData.filter(item => item.has_infobox_template).length;
-    const infoboxCount = infoboxCharCount + infoboxTemplateCount;
+    // Count only pages that have infobox templates (either character or other)
+    const infoboxCount = allData.filter(item => 
+        item.has_infobox_character_template || item.has_infobox_template
+    ).length;
     
-    const infoboxClassCount = allData.filter(item => item.has_infobox_class).length;
-    const articleTableCount = allData.filter(item => item.has_article_table_class).length;
-    const otherTableCount = allData.filter(item => item.has_other_table).length;
-    const tableCount = infoboxClassCount + articleTableCount + otherTableCount;
+    // Count only pages that have any table structure
+    const tableCount = allData.filter(item => 
+        item.has_infobox_class || item.has_article_table_class || item.has_other_table
+    ).length;
     
     const protectedCount = allData.filter(item => item.is_admin_protected).length;
     
@@ -691,7 +692,10 @@ function createStatusCell(value) {
     const cell = document.createElement('td');
     cell.className = 'px-6 py-4 whitespace-nowrap text-center';
     
-    if (value) {
+    // Make sure value is actually a boolean
+    const isTrue = Boolean(value);
+    
+    if (isTrue) {
         cell.innerHTML = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"><i class="fas fa-check mr-1"></i>Yes</span>';
     } else {
         cell.innerHTML = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"><i class="fas fa-times mr-1"></i>No</span>';
