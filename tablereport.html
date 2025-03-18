@@ -105,7 +105,7 @@
         <!-- Data Summary Section -->
         <div id="dataSummary" class="bg-white rounded-lg shadow p-6 mb-8 hidden">
             <h2 class="text-xl font-semibold mb-4">Summary</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
                     <h3 class="text-lg font-medium text-blue-800">Pages Analyzed</h3>
                     <p class="text-3xl font-bold text-blue-600" id="totalPages">0</p>
@@ -117,6 +117,10 @@
                 <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
                     <h3 class="text-lg font-medium text-purple-800">Table Structures</h3>
                     <p class="text-3xl font-bold text-purple-600" id="totalTables">0</p>
+                </div>
+                <div class="bg-red-50 p-4 rounded-lg border border-red-200">
+                    <h3 class="text-lg font-medium text-red-800">Admin Protected</h3>
+                    <p class="text-3xl font-bold text-red-600" id="protectedPages">0</p>
                 </div>
             </div>
         </div>
@@ -140,26 +144,52 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Additional charts for protection status -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <!-- Chart 3: Protection Status -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-semibold mb-4">Protection Status</h2>
+                    <div class="h-64">
+                        <canvas id="protectionChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Chart 4: Protection by Page Type -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-semibold mb-4">Admin Protected Pages by Type</h2>
+                    <div class="h-64">
+                        <canvas id="protectionByTypeChart"></canvas>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Data Table Section -->
         <div id="dataTableSection" class="bg-white rounded-lg shadow p-6 mb-8 hidden">
-            <div class="flex justify-between items-center mb-4">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-4 md:space-y-0">
                 <h2 class="text-xl font-semibold">Page Details</h2>
-                <div class="flex space-x-2">
-                    <input id="tableSearch" type="text" placeholder="Search pages..." class="shadow border rounded py-2 px-3 text-gray-700">
-                    <select id="tableFilter" class="shadow border rounded py-2 px-3 text-gray-700">
-                        <option value="all">All Pages</option>
-                        <option value="infobox_character">Infobox Character</option>
-                        <option value="infobox_template">Other Infobox Templates</option>
-                        <option value="infobox_class">Infobox Class</option>
-                        <option value="article_table">Article Table</option>
-                        <option value="other_table">Other Tables</option>
-                        <option value="no_table">No Tables</option>
-                    </select>
-                    <button id="exportCsvBtn" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                        <i class="fas fa-download mr-1"></i> Export CSV
-                    </button>
+                <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 w-full md:w-auto">
+                    <input id="tableSearch" type="text" placeholder="Search pages..." class="shadow border rounded py-2 px-3 text-gray-700 w-full md:w-auto">
+                    <div class="flex space-x-2">
+                        <select id="tableFilter" class="shadow border rounded py-2 px-3 text-gray-700">
+                            <option value="all">All Pages</option>
+                            <option value="infobox_character">Infobox Character</option>
+                            <option value="infobox_template">Other Infobox Templates</option>
+                            <option value="infobox_class">Infobox Class</option>
+                            <option value="article_table">Article Table</option>
+                            <option value="other_table">Other Tables</option>
+                            <option value="no_table">No Tables</option>
+                        </select>
+                        <select id="protectionFilter" class="shadow border rounded py-2 px-3 text-gray-700">
+                            <option value="all">All Protection</option>
+                            <option value="protected">Admin Protected</option>
+                            <option value="unprotected">Not Protected</option>
+                        </select>
+                        <button id="exportCsvBtn" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                            <i class="fas fa-download mr-1"></i> Export CSV
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="overflow-x-auto">
@@ -167,6 +197,7 @@
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Page Title</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Admin Protected</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Infobox Character</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Other Infobox</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Infobox Class</th>
@@ -216,6 +247,7 @@
                 <div>
                     <h3 class="text-lg font-medium">About Table Types</h3>
                     <ul class="list-disc list-inside text-gray-700 space-y-2">
+                        <li><strong>Admin Protected:</strong> Pages that are protected so only administrators can edit them</li>
                         <li><strong>Infobox Character Template:</strong> Pages using <code>{{Infobox character}}</code></li>
                         <li><strong>Other Infobox Templates:</strong> Pages using other infobox templates</li>
                         <li><strong>Infobox Class:</strong> Pages with tables using <code>class="infobox"</code></li>
