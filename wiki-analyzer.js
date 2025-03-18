@@ -287,21 +287,26 @@ function handleFileUpload(file) {
     
     Papa.parse(file, {
         header: true,
-        dynamicTyping: true,
+        dynamicTyping: false, // Changed to false so we can handle conversion ourselves
         complete: function(results) {
-            // Convert string boolean values to actual booleans if needed
+            // Convert string boolean values to actual booleans
             const processedData = results.data.map(row => {
                 const processedRow = {...row};
                 for (const key in processedRow) {
-                    if (processedRow[key] === 'true') processedRow[key] = true;
-                    if (processedRow[key] === 'false') processedRow[key] = false;
-                    if (processedRow[key] === 'TRUE') processedRow[key] = true;
-                    if (processedRow[key] === 'FALSE') processedRow[key] = false;
+                    // Properly handle boolean values regardless of case
+                    if (typeof processedRow[key] === 'string') {
+                        const lowerValue = processedRow[key].toLowerCase();
+                        if (lowerValue === 'true') processedRow[key] = true;
+                        else if (lowerValue === 'false') processedRow[key] = false;
+                    }
                 }
                 return processedRow;
             });
             
-            loadData(processedData);
+            // Remove any rows that don't have all required fields
+            const validData = processedData.filter(row => row.title && row.title.trim() !== '');
+            
+            loadData(validData);
         },
         error: function(error) {
             hideLoading();
@@ -324,29 +329,33 @@ function loadData(data) {
 
 function updateSummary() {
     // Update total counts
-    const totalPagesEl = safeGetElement('totalPages');
-    if (totalPagesEl) totalPagesEl.textContent = allData.length;
+    document.getElementById('totalPages').textContent = allData.length;
     
-    // Count only pages that have infobox templates (either character or other)
-    const infoboxCount = allData.filter(item => 
-        item.has_infobox_character_template || item.has_infobox_template
+    // Count pages with infobox templates (either character or other)
+    const infoboxTemplateCount = allData.filter(item => 
+        item.has_infobox_character_template === true || 
+        item.has_infobox_template === true
     ).length;
     
-    // Count only pages that have any table structure
-    const tableCount = allData.filter(item => 
-        item.has_infobox_class || item.has_article_table_class || item.has_other_table
+    // Count pages with any table structure
+    const tableStructureCount = allData.filter(item => 
+        item.has_infobox_class === true || 
+        item.has_article_table_class === true || 
+        item.has_other_table === true
     ).length;
     
-    const protectedCount = allData.filter(item => item.is_admin_protected).length;
+    // Count protected pages
+    const protectedCount = allData.filter(item => 
+        item.is_admin_protected === true
+    ).length;
     
-    const totalInfoboxesEl = safeGetElement('totalInfoboxes');
-    if (totalInfoboxesEl) totalInfoboxesEl.textContent = infoboxCount;
+    document.getElementById('totalInfoboxes').textContent = infoboxTemplateCount;
+    document.getElementById('totalTables').textContent = tableStructureCount;
     
-    const totalTablesEl = safeGetElement('totalTables');
-    if (totalTablesEl) totalTablesEl.textContent = tableCount;
-    
-    const protectedPagesEl = safeGetElement('protectedPages');
-    if (protectedPagesEl) protectedPagesEl.textContent = protectedCount;
+    const protectedPagesElement = document.getElementById('protectedPages');
+    if (protectedPagesElement) {
+        protectedPagesElement.textContent = protectedCount;
+    }
 }
 
 function createCharts() {
@@ -692,10 +701,8 @@ function createStatusCell(value) {
     const cell = document.createElement('td');
     cell.className = 'px-6 py-4 whitespace-nowrap text-center';
     
-    // Make sure value is actually a boolean
-    const isTrue = Boolean(value);
-    
-    if (isTrue) {
+    // Strictly check for true boolean value
+    if (value === true) {
         cell.innerHTML = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"><i class="fas fa-check mr-1"></i>Yes</span>';
     } else {
         cell.innerHTML = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"><i class="fas fa-times mr-1"></i>No</span>';
