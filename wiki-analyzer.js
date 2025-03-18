@@ -4,6 +4,11 @@ let filteredData = [];
 let currentPage = 1;
 const rowsPerPage = 10;
 
+// Helper function to safely get DOM elements
+function safeGetElement(id) {
+    return document.getElementById(id);
+}
+
 // Sample data for demonstration
 const sampleData = [
     {title: "Character1", has_infobox_character_template: true, has_infobox_template: false, has_infobox_class: false, has_article_table_class: false, has_other_table: false, is_admin_protected: true},
@@ -132,104 +137,149 @@ function generateMockData(count = 50) {
 // Initialize elements
 document.addEventListener('DOMContentLoaded', function() {
     // Setup data source change handler
-    document.getElementById('dataSource').addEventListener('change', function() {
-        const source = this.value;
-        document.getElementById('fileUploadSection').classList.add('hidden');
-        document.getElementById('scriptParamsSection').classList.add('hidden');
-        
-        if (source === 'upload') {
-            document.getElementById('fileUploadSection').classList.remove('hidden');
-        } else if (source === 'generate') {
-            document.getElementById('scriptParamsSection').classList.remove('hidden');
-        }
-    });
+    const dataSourceEl = safeGetElement('dataSource');
+    if (dataSourceEl) {
+        dataSourceEl.addEventListener('change', function() {
+            const source = this.value;
+            const fileUpload = safeGetElement('fileUploadSection');
+            const scriptParams = safeGetElement('scriptParamsSection');
+            
+            if (fileUpload) fileUpload.classList.add('hidden');
+            if (scriptParams) scriptParams.classList.add('hidden');
+            
+            if (source === 'upload' && fileUpload) {
+                fileUpload.classList.remove('hidden');
+            } else if (source === 'generate' && scriptParams) {
+                scriptParams.classList.remove('hidden');
+            }
+        });
+    }
     
     // Setup load data button
-    document.getElementById('loadDataBtn').addEventListener('click', function() {
-        const source = document.getElementById('dataSource').value;
-        
-        if (source === 'sample') {
-            loadData(sampleData);
-        } else if (source === 'upload') {
-            const fileInput = document.getElementById('csvFile');
-            if (fileInput.files.length > 0) {
-                handleFileUpload(fileInput.files[0]);
-            } else {
-                alert('Please select a CSV file first.');
+    const loadDataBtn = safeGetElement('loadDataBtn');
+    if (loadDataBtn) {
+        loadDataBtn.addEventListener('click', function() {
+            const dataSourceEl = safeGetElement('dataSource');
+            if (!dataSourceEl) return;
+            
+            const source = dataSourceEl.value;
+            
+            if (source === 'sample') {
+                loadData(sampleData);
+            } else if (source === 'upload') {
+                const fileInput = safeGetElement('csvFile');
+                if (fileInput && fileInput.files.length > 0) {
+                    handleFileUpload(fileInput.files[0]);
+                } else {
+                    alert('Please select a CSV file first.');
+                }
+            } else if (source === 'generate') {
+                showLoading();
+                // In a real application, this would call a server-side script
+                // For this demo, we'll generate mock data after a delay
+                setTimeout(() => {
+                    const limitEl = safeGetElement('limit');
+                    const count = limitEl ? (parseInt(limitEl.value) || 50) : 50;
+                    const data = generateMockData(count);
+                    loadData(data);
+                }, 1500);
             }
-        } else if (source === 'generate') {
+        });
+    }
+    
+    // Setup generate data button
+    const generateBtn = safeGetElement('generateDataBtn');
+    if (generateBtn) {
+        generateBtn.addEventListener('click', function() {
             showLoading();
             // In a real application, this would call a server-side script
             // For this demo, we'll generate mock data after a delay
             setTimeout(() => {
-                const count = parseInt(document.getElementById('limit').value) || 50;
+                const limitEl = safeGetElement('limit');
+                const count = limitEl ? (parseInt(limitEl.value) || 50) : 50;
                 const data = generateMockData(count);
                 loadData(data);
             }, 1500);
-        }
-    });
-    
-    // Setup generate data button
-    document.getElementById('generateDataBtn').addEventListener('click', function() {
-        showLoading();
-        // In a real application, this would call a server-side script
-        // For this demo, we'll generate mock data after a delay
-        setTimeout(() => {
-            const count = parseInt(document.getElementById('limit').value) || 50;
-            const data = generateMockData(count);
-            loadData(data);
-        }, 1500);
-    });
+        });
+    }
     
     // Setup export CSV button
-    document.getElementById('exportCsvBtn').addEventListener('click', function() {
-        exportToCsv();
-    });
+    const exportBtn = safeGetElement('exportCsvBtn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', function() {
+            exportToCsv();
+        });
+    }
     
     // Setup table search
-    document.getElementById('tableSearch').addEventListener('input', function() {
-        filterTable();
-    });
+    const tableSearch = safeGetElement('tableSearch');
+    if (tableSearch) {
+        tableSearch.addEventListener('input', function() {
+            filterTable();
+        });
+    }
     
     // Setup table filter
-    document.getElementById('tableFilter').addEventListener('change', function() {
-        filterTable();
-    });
+    const tableFilter = safeGetElement('tableFilter');
+    if (tableFilter) {
+        tableFilter.addEventListener('change', function() {
+            filterTable();
+        });
+    }
     
     // Setup protection filter
-    document.getElementById('protectionFilter').addEventListener('change', function() {
-        filterTable();
-    });
+    const protectionFilter = safeGetElement('protectionFilter');
+    if (protectionFilter) {
+        protectionFilter.addEventListener('change', function() {
+            filterTable();
+        });
+    }
     
     // Setup pagination
-    document.getElementById('prevPageBtn').addEventListener('click', function() {
-        if (currentPage > 1) {
-            currentPage--;
-            displayTablePage();
-        }
-    });
+    const prevPageBtn = safeGetElement('prevPageBtn');
+    if (prevPageBtn) {
+        prevPageBtn.addEventListener('click', function() {
+            if (currentPage > 1) {
+                currentPage--;
+                displayTablePage();
+            }
+        });
+    }
     
-    document.getElementById('nextPageBtn').addEventListener('click', function() {
-        const maxPage = Math.ceil(filteredData.length / rowsPerPage);
-        if (currentPage < maxPage) {
-            currentPage++;
-            displayTablePage();
-        }
-    });
+    const nextPageBtn = safeGetElement('nextPageBtn');
+    if (nextPageBtn) {
+        nextPageBtn.addEventListener('click', function() {
+            const maxPage = Math.ceil(filteredData.length / rowsPerPage);
+            if (currentPage < maxPage) {
+                currentPage++;
+                displayTablePage();
+            }
+        });
+    }
 });
 
 function showLoading() {
-    document.getElementById('loadingIndicator').classList.remove('hidden');
-    document.getElementById('dataSummary').classList.add('hidden');
-    document.getElementById('chartsSection').classList.add('hidden');
-    document.getElementById('dataTableSection').classList.add('hidden');
+    const loadingEl = safeGetElement('loadingIndicator');
+    const dataSummaryEl = safeGetElement('dataSummary');
+    const chartsEl = safeGetElement('chartsSection');
+    const dataTableEl = safeGetElement('dataTableSection');
+    
+    if (loadingEl) loadingEl.classList.remove('hidden');
+    if (dataSummaryEl) dataSummaryEl.classList.add('hidden');
+    if (chartsEl) chartsEl.classList.add('hidden');
+    if (dataTableEl) dataTableEl.classList.add('hidden');
 }
 
 function hideLoading() {
-    document.getElementById('loadingIndicator').classList.add('hidden');
-    document.getElementById('dataSummary').classList.remove('hidden');
-    document.getElementById('chartsSection').classList.remove('hidden');
-    document.getElementById('dataTableSection').classList.remove('hidden');
+    const loadingEl = safeGetElement('loadingIndicator');
+    const dataSummaryEl = safeGetElement('dataSummary');
+    const chartsEl = safeGetElement('chartsSection');
+    const dataTableEl = safeGetElement('dataTableSection');
+    
+    if (loadingEl) loadingEl.classList.add('hidden');
+    if (dataSummaryEl) dataSummaryEl.classList.remove('hidden');
+    if (chartsEl) chartsEl.classList.remove('hidden');
+    if (dataTableEl) dataTableEl.classList.remove('hidden');
 }
 
 function handleFileUpload(file) {
@@ -274,7 +324,8 @@ function loadData(data) {
 
 function updateSummary() {
     // Update total counts
-    document.getElementById('totalPages').textContent = allData.length;
+    const totalPagesEl = safeGetElement('totalPages');
+    if (totalPagesEl) totalPagesEl.textContent = allData.length;
     
     const infoboxCharCount = allData.filter(item => item.has_infobox_character_template).length;
     const infoboxTemplateCount = allData.filter(item => item.has_infobox_template).length;
@@ -287,9 +338,14 @@ function updateSummary() {
     
     const protectedCount = allData.filter(item => item.is_admin_protected).length;
     
-    document.getElementById('totalInfoboxes').textContent = infoboxCount;
-    document.getElementById('totalTables').textContent = tableCount;
-    document.getElementById('protectedPages').textContent = protectedCount;
+    const totalInfoboxesEl = safeGetElement('totalInfoboxes');
+    if (totalInfoboxesEl) totalInfoboxesEl.textContent = infoboxCount;
+    
+    const totalTablesEl = safeGetElement('totalTables');
+    if (totalTablesEl) totalTablesEl.textContent = tableCount;
+    
+    const protectedPagesEl = safeGetElement('protectedPages');
+    if (protectedPagesEl) protectedPagesEl.textContent = protectedCount;
 }
 
 function createCharts() {
@@ -314,202 +370,214 @@ function createCharts() {
     const unprotectedCount = allData.length - protectedCount;
     
     // Create or update infobox chart
-    const infoboxCtx = document.getElementById('infoboxChart').getContext('2d');
-    
-    // Check if chart exists before trying to destroy it
-    if (window.infoboxChart instanceof Chart) {
-        window.infoboxChart.destroy();
-    }
-    
-    window.infoboxChart = new Chart(infoboxCtx, {
-        type: 'pie',
-        data: {
-            labels: ['Infobox Character', 'Other Infobox Templates', 'Infobox Class', 'No Infobox'],
-            datasets: [{
-                data: [infoboxCharCount, infoboxTemplateCount, infoboxClassCount, 
-                        allData.length - (infoboxCharCount + infoboxTemplateCount + infoboxClassCount)],
-                backgroundColor: [
-                    'rgba(54, 162, 235, 0.7)',
-                    'rgba(75, 192, 192, 0.7)',
-                    'rgba(153, 102, 255, 0.7)',
-                    'rgba(201, 203, 207, 0.7)'
-                ],
-                borderColor: [
-                    'rgb(54, 162, 235)',
-                    'rgb(75, 192, 192)',
-                    'rgb(153, 102, 255)',
-                    'rgb(201, 203, 207)'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'right',
+    const infoboxCtx = safeGetElement('infoboxChart');
+    if (infoboxCtx) {
+        const ctx = infoboxCtx.getContext('2d');
+        
+        // Check if chart exists before trying to destroy it
+        if (window.infoboxChart instanceof Chart) {
+            window.infoboxChart.destroy();
+        }
+        
+        window.infoboxChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Infobox Character', 'Other Infobox Templates', 'Infobox Class', 'No Infobox'],
+                datasets: [{
+                    data: [infoboxCharCount, infoboxTemplateCount, infoboxClassCount, 
+                            allData.length - (infoboxCharCount + infoboxTemplateCount + infoboxClassCount)],
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(75, 192, 192, 0.7)',
+                        'rgba(153, 102, 255, 0.7)',
+                        'rgba(201, 203, 207, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgb(54, 162, 235)',
+                        'rgb(75, 192, 192)',
+                        'rgb(153, 102, 255)',
+                        'rgb(201, 203, 207)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    }
                 }
             }
-        }
-    });
+        });
+    }
     
     // Create or update table chart
-    const tableCtx = document.getElementById('tableChart').getContext('2d');
-    
-    // Check if chart exists before trying to destroy it
-    if (window.tableChart instanceof Chart) {
-        window.tableChart.destroy();
-    }
-    
-    window.tableChart = new Chart(tableCtx, {
-        type: 'pie',
-        data: {
-            labels: ['Infobox Class', 'Article Table', 'Other Tables', 'No Tables'],
-            datasets: [{
-                data: [infoboxClassCount, articleTableCount, otherTableCount, noTableCount],
-                backgroundColor: [
-                    'rgba(153, 102, 255, 0.7)',
-                    'rgba(255, 159, 64, 0.7)',
-                    'rgba(255, 99, 132, 0.7)',
-                    'rgba(201, 203, 207, 0.7)'
-                ],
-                borderColor: [
-                    'rgb(153, 102, 255)',
-                    'rgb(255, 159, 64)',
-                    'rgb(255, 99, 132)',
-                    'rgb(201, 203, 207)'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'right',
+    const tableCtx = safeGetElement('tableChart');
+    if (tableCtx) {
+        const ctx = tableCtx.getContext('2d');
+        
+        // Check if chart exists before trying to destroy it
+        if (window.tableChart instanceof Chart) {
+            window.tableChart.destroy();
+        }
+        
+        window.tableChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Infobox Class', 'Article Table', 'Other Tables', 'No Tables'],
+                datasets: [{
+                    data: [infoboxClassCount, articleTableCount, otherTableCount, noTableCount],
+                    backgroundColor: [
+                        'rgba(153, 102, 255, 0.7)',
+                        'rgba(255, 159, 64, 0.7)',
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(201, 203, 207, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgb(153, 102, 255)',
+                        'rgb(255, 159, 64)',
+                        'rgb(255, 99, 132)',
+                        'rgb(201, 203, 207)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    }
                 }
             }
-        }
-    });
+        });
+    }
     
     // Create or update protection chart
-    const protectionCtx = document.getElementById('protectionChart').getContext('2d');
-    
-    // Check if chart exists before trying to destroy it
-    if (window.protectionChart instanceof Chart) {
-        window.protectionChart.destroy();
-    }
-    
-    window.protectionChart = new Chart(protectionCtx, {
-        type: 'pie',
-        data: {
-            labels: ['Admin Protected', 'Not Protected'],
-            datasets: [{
-                data: [protectedCount, unprotectedCount],
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.7)',
-                    'rgba(75, 192, 192, 0.7)'
-                ],
-                borderColor: [
-                    'rgb(255, 99, 132)',
-                    'rgb(75, 192, 192)'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'right',
+    const protectionCtx = safeGetElement('protectionChart');
+    if (protectionCtx) {
+        const ctx = protectionCtx.getContext('2d');
+        
+        // Check if chart exists before trying to destroy it
+        if (window.protectionChart instanceof Chart) {
+            window.protectionChart.destroy();
+        }
+        
+        window.protectionChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Admin Protected', 'Not Protected'],
+                datasets: [{
+                    data: [protectedCount, unprotectedCount],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(75, 192, 192, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgb(255, 99, 132)',
+                        'rgb(75, 192, 192)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    }
                 }
             }
-        }
-    });
+        });
+    }
     
     // Create protection by type chart
-    const protectionByTypeCtx = document.getElementById('protectionByTypeChart').getContext('2d');
-    
-    // Check if chart exists before trying to destroy it
-    if (window.protectionByTypeChart instanceof Chart) {
-        window.protectionByTypeChart.destroy();
-    }
-    
-    // Get protected count by page type
-    const protectedCharCount = allData.filter(item => 
-        item.is_admin_protected && item.has_infobox_character_template
-    ).length;
-    
-    const protectedOtherInfoboxCount = allData.filter(item => 
-        item.is_admin_protected && item.has_infobox_template
-    ).length;
-    
-    const protectedInfoboxClassCount = allData.filter(item => 
-        item.is_admin_protected && item.has_infobox_class
-    ).length;
-    
-    const protectedArticleTableCount = allData.filter(item => 
-        item.is_admin_protected && item.has_article_table_class
-    ).length;
-    
-    const protectedOtherTableCount = allData.filter(item => 
-        item.is_admin_protected && item.has_other_table
-    ).length;
-    
-    const protectedNoTableCount = allData.filter(item => 
-        item.is_admin_protected && 
-        !item.has_infobox_character_template && 
-        !item.has_infobox_template &&
-        !item.has_infobox_class &&
-        !item.has_article_table_class &&
-        !item.has_other_table
-    ).length;
-    
-    window.protectionByTypeChart = new Chart(protectionByTypeCtx, {
-        type: 'bar',
-        data: {
-            labels: [
-                'Character Infobox', 
-                'Other Infobox', 
-                'Infobox Class', 
-                'Article Table', 
-                'Other Table', 
-                'No Table'
-            ],
-            datasets: [{
-                label: 'Protected Pages by Type',
-                data: [
-                    protectedCharCount,
-                    protectedOtherInfoboxCount,
-                    protectedInfoboxClassCount,
-                    protectedArticleTableCount,
-                    protectedOtherTableCount,
-                    protectedNoTableCount
+    const protectionByTypeCtx = safeGetElement('protectionByTypeChart');
+    if (protectionByTypeCtx) {
+        const ctx = protectionByTypeCtx.getContext('2d');
+        
+        // Check if chart exists before trying to destroy it
+        if (window.protectionByTypeChart instanceof Chart) {
+            window.protectionByTypeChart.destroy();
+        }
+        
+        // Get protected count by page type
+        const protectedCharCount = allData.filter(item => 
+            item.is_admin_protected && item.has_infobox_character_template
+        ).length;
+        
+        const protectedOtherInfoboxCount = allData.filter(item => 
+            item.is_admin_protected && item.has_infobox_template
+        ).length;
+        
+        const protectedInfoboxClassCount = allData.filter(item => 
+            item.is_admin_protected && item.has_infobox_class
+        ).length;
+        
+        const protectedArticleTableCount = allData.filter(item => 
+            item.is_admin_protected && item.has_article_table_class
+        ).length;
+        
+        const protectedOtherTableCount = allData.filter(item => 
+            item.is_admin_protected && item.has_other_table
+        ).length;
+        
+        const protectedNoTableCount = allData.filter(item => 
+            item.is_admin_protected && 
+            !item.has_infobox_character_template && 
+            !item.has_infobox_template &&
+            !item.has_infobox_class &&
+            !item.has_article_table_class &&
+            !item.has_other_table
+        ).length;
+        
+        window.protectionByTypeChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [
+                    'Character Infobox', 
+                    'Other Infobox', 
+                    'Infobox Class', 
+                    'Article Table', 
+                    'Other Table', 
+                    'No Table'
                 ],
-                backgroundColor: 'rgba(54, 162, 235, 0.7)',
-                borderColor: 'rgb(54, 162, 235)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true
+                datasets: [{
+                    label: 'Protected Pages by Type',
+                    data: [
+                        protectedCharCount,
+                        protectedOtherInfoboxCount,
+                        protectedInfoboxClassCount,
+                        protectedArticleTableCount,
+                        protectedOtherTableCount,
+                        protectedNoTableCount
+                    ],
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    borderColor: 'rgb(54, 162, 235)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
                 }
             }
-        }
-    });
+        });
+    }
 }
 
 function filterTable() {
-    const searchTerm = document.getElementById('tableSearch').value.toLowerCase();
-    const filterType = document.getElementById('tableFilter').value;
-    const protectionFilter = document.getElementById('protectionFilter').value;
+    const searchTerm = safeGetElement('tableSearch') ? safeGetElement('tableSearch').value.toLowerCase() : '';
+    const filterType = safeGetElement('tableFilter') ? safeGetElement('tableFilter').value : 'all';
+    const protectionFilter = safeGetElement('protectionFilter') ? safeGetElement('protectionFilter').value : 'all';
     
     filteredData = allData.filter(item => {
         // Apply search filter
@@ -552,7 +620,9 @@ function filterTable() {
 }
 
 function displayTablePage() {
-    const tableBody = document.getElementById('dataTableBody');
+    const tableBody = safeGetElement('dataTableBody');
+    if (!tableBody) return;
+    
     tableBody.innerHTML = '';
     
     const startIdx = (currentPage - 1) * rowsPerPage;
@@ -569,10 +639,12 @@ function displayTablePage() {
         titleCell.textContent = item.title;
         row.appendChild(titleCell);
         
-        // Admin Protected
-        const protectedCell = createStatusCell(item.is_admin_protected);
-        protectedCell.className += item.is_admin_protected ? ' bg-red-50' : '';
-        row.appendChild(protectedCell);
+        // Admin Protected (only add if we're using the updated HTML)
+        if ('is_admin_protected' in item) {
+            const protectedCell = createStatusCell(item.is_admin_protected);
+            protectedCell.className += item.is_admin_protected ? ' bg-red-50' : '';
+            row.appendChild(protectedCell);
+        }
         
         // Infobox Character
         const infoboxCharCell = createStatusCell(item.has_infobox_character_template);
@@ -598,13 +670,21 @@ function displayTablePage() {
     });
     
     // Update pagination info
-    document.getElementById('shownRows').textContent = pageData.length;
-    document.getElementById('totalRows').textContent = filteredData.length;
-    document.getElementById('paginationInfo').textContent = `Page ${currentPage} of ${Math.max(1, Math.ceil(filteredData.length / rowsPerPage))}`;
+    const shownRowsEl = safeGetElement('shownRows');
+    const totalRowsEl = safeGetElement('totalRows');
+    const paginationInfoEl = safeGetElement('paginationInfo');
+    
+    if (shownRowsEl) shownRowsEl.textContent = pageData.length;
+    if (totalRowsEl) totalRowsEl.textContent = filteredData.length;
+    if (paginationInfoEl) paginationInfoEl.textContent = `Page ${currentPage} of ${Math.max(1, Math.ceil(filteredData.length / rowsPerPage))}`;
     
     // Update pagination buttons
-    document.getElementById('prevPageBtn').disabled = currentPage <= 1;
-    document.getElementById('nextPageBtn').disabled = currentPage >= Math.ceil(filteredData.length / rowsPerPage);
+    // Update pagination buttons
+const prevPageBtn = safeGetElement('prevPageBtn');
+const nextPageBtn = safeGetElement('nextPageBtn');
+
+if (prevPageBtn) prevPageBtn.disabled = currentPage <= 1;
+if (nextPageBtn) nextPageBtn.disabled = currentPage >= Math.ceil(filteredData.length / rowsPerPage);
 }
 
 function createStatusCell(value) {
@@ -625,11 +705,27 @@ function exportToCsv() {
     let csvContent = "data:text/csv;charset=utf-8,";
     
     // Add headers
-    csvContent += "Page Title,Admin Protected,Infobox Character,Other Infobox,Infobox Class,Article Table,Other Table\n";
+    let headers = "Page Title,";
+    
+    // Add is_admin_protected column if it exists
+    if (filteredData.length > 0 && 'is_admin_protected' in filteredData[0]) {
+        headers += "Admin Protected,";
+    }
+    
+    headers += "Infobox Character,Other Infobox,Infobox Class,Article Table,Other Table\n";
+    csvContent += headers;
     
     // Add data rows
     filteredData.forEach(item => {
-        csvContent += `"${item.title}",${item.is_admin_protected},${item.has_infobox_character_template},${item.has_infobox_template},${item.has_infobox_class},${item.has_article_table_class},${item.has_other_table}\n`;
+        let row = `"${item.title}",`;
+        
+        // Add is_admin_protected value if it exists
+        if ('is_admin_protected' in item) {
+            row += `${item.is_admin_protected},`;
+        }
+        
+        row += `${item.has_infobox_character_template},${item.has_infobox_template},${item.has_infobox_class},${item.has_article_table_class},${item.has_other_table}\n`;
+        csvContent += row;
     });
     
     // Create download link
