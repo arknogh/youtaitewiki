@@ -291,7 +291,9 @@ function createCharts() {
     
     // Create or update infobox chart
     const infoboxCtx = document.getElementById('infoboxChart').getContext('2d');
-    if (window.infoboxChart) {
+    
+    // Check if chart exists before trying to destroy it
+    if (window.infoboxChart instanceof Chart) {
         window.infoboxChart.destroy();
     }
     
@@ -330,7 +332,9 @@ function createCharts() {
     
     // Create or update table chart
     const tableCtx = document.getElementById('tableChart').getContext('2d');
-    if (window.tableChart) {
+    
+    // Check if chart exists before trying to destroy it
+    if (window.tableChart instanceof Chart) {
         window.tableChart.destroy();
     }
     
