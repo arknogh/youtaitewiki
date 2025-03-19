@@ -1,2 +1,105 @@
-<h1>welcome to arknogh/youtaitewiki page!</h1>
-<marquee>welcome, welcome!</marquee>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>arknogh/youtaitewiki</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Fetch the directory listing
+                const response = await fetch('https://api.github.com/repos/arknogh/youtaitewiki/contents/');
+                const data = await response.json();
+                
+                // Filter only HTML files except the current one
+                const htmlFiles = data
+                    .filter(item => item.name.endsWith('.html') && item.name !== 'index.html')
+                    .sort((a, b) => a.name.localeCompare(b.name));
+                
+                const fileList = document.getElementById('file-list');
+                
+                if (htmlFiles.length === 0) {
+                    fileList.innerHTML = '<p class="text-gray-500 italic text-center py-8">No HTML files found in this directory.</p>';
+                    return;
+                }
+                
+                // Create the list items
+                htmlFiles.forEach(file => {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'mb-4 bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:shadow-xl hover:-translate-y-1';
+                    
+                    const link = document.createElement('a');
+                    link.href = file.name;
+                    link.className = 'block p-4 hover:bg-blue-50';
+                    
+                    const fileIcon = document.createElement('div');
+                    fileIcon.className = 'flex items-center';
+                    fileIcon.innerHTML = `
+                        <svg class="w-6 h-6 mr-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <span class="text-lg font-medium text-gray-800">${file.name}</span>
+                    `;
+                    
+                    link.appendChild(fileIcon);
+                    listItem.appendChild(link);
+                    fileList.appendChild(listItem);
+                });
+                
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('content-container').classList.remove('hidden');
+            } catch (error) {
+                console.error('Error fetching directory listing:', error);
+                document.getElementById('loading').innerHTML = `
+                    <div class="text-red-500 text-center py-8">
+                        <p class="text-xl font-bold">Error loading files</p>
+                        <p class="text-sm mt-2">Please check your repository settings or refresh the page.</p>
+                    </div>
+                `;
+            }
+        });
+    </script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Original elements preserved -->
+    <h1>welcome to arknogh/youtaitewiki page!</h1>
+    <marquee>welcome, welcome!</marquee>
+    
+    <!-- Enhanced file listing section -->
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <div id="loading" class="flex justify-center py-16">
+            <svg class="animate-spin h-10 w-10 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        </div>
+        
+        <div id="content-container" class="hidden">
+            <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-t-lg shadow-md">
+                <div class="px-6 py-4">
+                    <h2 class="text-white text-xl font-bold">Directory Contents</h2>
+                    <p class="text-blue-100 text-sm">HTML files in this repository</p>
+                </div>
+            </div>
+            
+            <ul id="file-list" class="bg-gray-50 rounded-b-lg shadow-md p-6"></ul>
+            
+            <div class="mt-8 text-center text-sm text-gray-500">
+                <p>This page dynamically lists all HTML files in the repository.</p>
+                <p class="mt-2">
+                    <a href="https://github.com/arknogh/youtaitewiki" class="text-blue-500 hover:text-blue-700 underline" target="_blank">
+                        View Repository on GitHub
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="mt-16 py-6 bg-gray-200">
+        <div class="text-center text-gray-600 text-sm">
+            <p>© 2025 arknogh/youtaitewiki</p>
+        </div>
+    </footer>
+</body>
+</html>
