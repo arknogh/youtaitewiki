@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Template Usage Analyzer - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
+    <style>
+        .loader {
+            border-top-color: #3498db;
+            -webkit-animation: spinner 1.5s linear infinite;
+            animation: spinner 1.5s linear infinite;
+        }
+        
+        @-webkit-keyframes spinner {
+            0% { -webkit-transform: rotate(0deg); }
+            100% { -webkit-transform: rotate(360deg); }
+        }
+        
+        @keyframes spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-6">
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Template Usage Analyzer</h1>
+            <p class="text-gray-600">Interactive dashboard for analyzing wiki template usage patterns</p>
+        </header>
+
+        <!-- Controls Section -->
+        <div class="bg-white rounded-lg shadow p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4">Configuration</h2>
+            
+            <!-- Data Source Input -->
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="dataSource">
+                    Data Source
+                </label>
+                <div class="flex space-x-2">
+                    <select id="dataSource" class="shadow border rounded py-2 px-3 text-gray-700 w-full">
+                        <option value="sample">Sample Data</option>
+                        <option value="upload">Upload CSV</option>
+                    </select>
+                    <button id="loadDataBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                        Load
+                    </button>
+                </div>
+            </div>
+            
+            <!-- File Upload (hidden initially) -->
+            <div id="fileUploadSection" class="mb-4 hidden">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="csvFile">
+                    Upload CSV File from Template Detection Script
+                </label>
+                <input id="csvFile" type="file" accept=".csv" class="shadow border rounded py-2 px-3 text-gray-700 w-full">
+                <p class="text-sm text-gray-500 mt-1">Upload the CSV output from detect_template_transclusions.py</p>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" class="hidden">
+            <div class="flex justify-center items-center mb-8">
+                <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12"></div>
+                <span class="ml-3 text-gray-700">Processing data...</span>
+            </div>
+        </div>
+
+        <!-- Data Summary Section -->
+        <div id="dataSummary" class="bg-white rounded-lg shadow p-6 mb-8 hidden">
+            <h2 class="text-xl font-semibold mb-4">Summary</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <h3 class="text-lg font-medium text-blue-800">Pages Analyzed</h3>
+                    <p class="text-3xl font-bold text-blue-600" id="totalPages">0</p>
+                </div>
+                <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                    <h3 class="text-lg font-medium text-green-800">Singer Template</h3>
+                    <p class="text-3xl font-bold text-green-600" id="singerTemplateCount">0</p>
+                </div>
+                <div class="bg-teal-50 p-4 rounded-lg border border-teal-200">
+                    <h3 class="text-lg font-medium text-teal-800">Youtaite Infobox</h3>
+                    <p class="text-3xl font-bold text-teal-600" id="youtaiteInfoboxCount">0</p>
+                </div>
+                <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                    <h3 class="text-lg font-medium text-purple-800">Character Infobox</h3>
+                    <p class="text-3xl font-bold text-purple-600" id="characterInfoboxCount">0</p>
+                </div>
+                <div class="bg-red-50 p-4 rounded-lg border border-red-200">
+                    <h3 class="text-lg font-medium text-red-800">Admin Protected</h3>
+                    <p class="text-3xl font-bold text-red-600" id="protectedPages">0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div id="chartsSection" class="hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <!-- Chart 1: Template Usage -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-semibold mb-4">Template Usage Distribution</h2>
+                    <div class="h-64">
+                        <canvas id="templateUsageChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Chart 2: Protection Status -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-semibold mb-4">Protection Status</h2>
+                    <div class="h-64">
+                        <canvas id="protectionStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <!-- Chart 3: Protected Templates -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-semibold mb-4">Admin Protected by Template</h2>
+                    <div class="h-64">
+                        <canvas id="protectedTemplatesChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Chart 4: Template Overlap -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-semibold mb-4">Template Combinations</h2>
+                    <div class="h-64">
+                        <canvas id="templateOverlapChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Data Table Section -->
+        <div id="dataTableSection" class="bg-white rounded-lg shadow p-6 mb-8 hidden">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-4 md:space-y-0">
+                <h2 class="text-xl font-semibold">Page Details</h2>
+                <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 w-full md:w-auto">
+                    <input id="tableSearch" type="text" placeholder="Search pages..." class="shadow border rounded py-2 px-3 text-gray-700 w-full md:w-auto">
+                    <div class="flex space-x-2">
+                        <select id="templateFilter" class="shadow border rounded py-2 px-3 text-gray-700">
+                            <option value="all">All Templates</option>
+                            <option value="singer_template">Singer Template</option>
+                            <option value="youtaite_infobox">Youtaite Infobox</option>
+                            <option value="character_infobox">Character Infobox</option>
+                            <option value="any_template">Any Template</option>
+                            <option value="no_template">No Templates</option>
+                        </select>
+                        <select id="protectionFilter" class="shadow border rounded py-2 px-3 text-gray-700">
+                            <option value="all">All Protection</option>
+                            <option value="protected">Admin Protected</option>
+                            <option value="unprotected">Not Protected</option>
+                        </select>
+                        <button id="exportCsvBtn" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                            <i class="fas fa-download mr-1"></i> Export CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full table-auto">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Page Title</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Admin Protected</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Singer Template</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Youtaite Infobox</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Character Infobox</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataTableBody" class="bg-white divide-y divide-gray-200">
+                        <!-- Table rows will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-4 flex justify-between items-center">
+                <div class="text-sm text-gray-700">
+                    Showing <span id="shownRows">0</span> of <span id="totalRows">0</span> pages
+                </div>
+                <div class="flex space-x-2">
+                    <button id="prevPageBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded" disabled>
+                        Previous
+                    </button>
+                    <span id="paginationInfo" class="py-2 px-4">Page 1</span>
+                    <button id="nextPageBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded" disabled>
+                        Next
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Instructions Section -->
+        <div class="bg-white rounded-lg shadow p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4">Instructions</h2>
+            <div class="space-y-4">
+                <div>
+                    <h3 class="text-lg font-medium">Getting Started</h3>
+                    <p class="text-gray-700">This dashboard helps you analyze the usage of templates across your wiki and their relationship to page protection status.</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-medium">Usage</h3>
+                    <ol class="list-decimal list-inside text-gray-700 space-y-2">
+                        <li>Run the <code>detect_template_transclusions.py</code> script to scan your wiki</li>
+                        <li>Use the <code>-csv</code> option to generate a CSV file</li>
+                        <li>Select "Upload CSV" in this dashboard and import the file</li>
+                        <li>Analyze the relationship between templates and protection status</li>
+                        <li>Filter the data table to find specific patterns</li>
+                        <li>Export filtered data as CSV for further analysis</li>
+                    </ol>
+                </div>
+                <div>
+                    <h3 class="text-lg font-medium">About Templates</h3>
+                    <ul class="list-disc list-inside text-gray-700 space-y-2">
+                        <li><strong>Singer Template:</strong> Pages using <code>{{Singer}}</code> template</li>
+                        <li><strong>Youtaite Infobox:</strong> Pages using <code>{{Youtaite Wiki Infobox}}</code> template</li>
+                        <li><strong>Character Infobox:</strong> Pages using <code>{{Infobox character}}</code> template</li>
+                        <li><strong>Admin Protected:</strong> Pages that can only be edited by administrators</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+      </div>
+      <!-- Load the JavaScript file -->
+      <script src="wiki-analyzer-for-old-template.js"></script>
+  </body>
+</html>
